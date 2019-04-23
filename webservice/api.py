@@ -9,8 +9,6 @@ xbot_webservice = Flask(__name__)
 CORS(xbot_webservice)
 current_scraper = random.choice(SCRAPERS)
 
-def is_valid_url(url):
-    return True
 
 @xbot_webservice.route("/")
 def index():
@@ -27,7 +25,7 @@ def redirect_scrape():
         return Response(json.dumps({'Error': 'Parameter url not found'}), status=400, mimetype='application/json')
     else:
         r = get_url(f'{current_scraper}{SCRAPER_ENDPOINT}?url={url}')
-        if (r.json().get('short_description') is None):
+        if r.json().get('short_description') is None:
             current_scraper = random.choice(list(set(SCRAPERS) - set([current_scraper])))
         return Response(json.dumps(r.json()), status=r.status_code, mimetype='application/json')
 
