@@ -27,6 +27,8 @@ def redirect_scrape():
         r = get_url(f'{current_scraper}{SCRAPER_ENDPOINT}?url={url}')
         if r.json().get('short_description') is None:
             current_scraper = random.choice(list(set(SCRAPERS) - set([current_scraper])))
+            r = get_url(f'{current_scraper}{SCRAPER_ENDPOINT}?url={url}')
+
         return Response(json.dumps(r.json()), status=r.status_code, mimetype='application/json')
 
 
