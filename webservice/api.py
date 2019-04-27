@@ -39,9 +39,16 @@ def redirect_scrape():
 
 @xbot_webservice.route('/api/newoffer', methods=['POST'])
 def new_offer():
+    if request.content_type != 'application/json':
+        return Response(json.dumps({'Error': 'Content-Type must be application/json'}), status=400, mimetype='application/json')
+
     payload = request.json
     message = payload.get('message')
     origin = payload.get('origin')
+
+    if message is None:
+        error_message = '"message" field is mandatory, try with {"message": "hello world", "origin": "me"}'
+        return Response(json.dumps({'Error': error_message}), status=400, mimetype='application/json')
 
     urls = captureURLs(message)
     for url in urls:
