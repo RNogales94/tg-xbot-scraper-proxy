@@ -6,9 +6,14 @@ import json
 import re
 import requests
 
+from xbot.xbotdb import Xbotdb
+from xbot.product import loadProductfromJSON
+
 xbot_webservice = Flask(__name__)
 CORS(xbot_webservice)
 current_scraper = random.choice(SCRAPERS)
+
+xbotdb = Xbotdb()
 
 
 def captureURLs(text):
@@ -64,6 +69,12 @@ def new_offer():
         if scraped['status'] == 200:
             offers.append(scraped['data'])
         print(origin)
+
+    for offer in offers:
+        # Save in Mongo
+        product = loadProductfromJSON(offer)
+        if product.is_completed:
+            xbotdb.insert_product(product, telegram_name='XBOT_API')
 
     return Response(json.dumps(offers), status=200, mimetype='application/json')
 
