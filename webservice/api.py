@@ -77,9 +77,13 @@ def scrape(url, user):
 
 @xbot_webservice.route('/api/scrape', methods=['POST'])
 def redirect_scrape():
+    print('-------------------------------------------')
     url = request.json.get('url')
     user = request.json.get('user') or None
+    print('URL='+url)
+    print('user='+user)
     scraped = scrape(url, user)
+    print('***********************************************')
     return Response(json.dumps(scraped['data']), status=scraped['status'], mimetype='application/json')
 
 
