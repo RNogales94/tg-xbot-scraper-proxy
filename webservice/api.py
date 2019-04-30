@@ -41,11 +41,12 @@ def get_scraper(user):
 def update_current_scraper(user):
     global current_scraper
     global current_scraper_heavy
+    global current_api_scraper
 
     if user in heavy_users:
         current_scraper_heavy = random.choice(list(set(SCRAPERS_HEAVY_VOLUME) - set([current_scraper_heavy])))
     elif user == 'XBOT_API':
-        current_scraper = random.choice(list(set(SCRAPERS_XBOT) - set([current_api_scraper])))
+        current_api_scraper = random.choice(list(set(SCRAPERS_XBOT) - set([current_api_scraper])))
     else:
         current_scraper = random.choice(list(set(SCRAPERS) - set([current_scraper])))
 
@@ -98,7 +99,7 @@ def new_offer():
     offers = []
     for url in urls:
         print(url)
-        scraped = scrape(url)
+        scraped = scrape(url, user='XBOT_API')
         if scraped['status'] == 200:
             offers.append(scraped['data'])
         print(origin)
