@@ -1,6 +1,6 @@
 from flask import Flask, Response, request
 from flask_cors import CORS
-from webservice.config import SCRAPERS, SCRAPER_ENDPOINT
+from webservice.config import SCRAPERS, SCRAPER_ENDPOINT, SCRAPERS_HEAVY_VOLUME
 import random
 import json
 import re
@@ -12,8 +12,10 @@ from xbot.product import loadProductfromJSON
 xbot_webservice = Flask(__name__)
 CORS(xbot_webservice)
 current_scraper = random.choice(SCRAPERS)
+current_scraper_heavy = random.choice(SCRAPERS_HEAVY_VOLUME)
 
 xbotdb = Xbotdb()
+heavy_users = ['gavaste']
 
 
 def captureURLs(text):
@@ -21,22 +23,45 @@ def captureURLs(text):
     return urls
 
 
+def get_scraper(user):
+    global current_scraper
+    global current_scraper_heavy
+
+    if user in heavy_users:
+        return current_scraper_heavy
+    else:
+        return current_scraper
+
+
+def update_current_scraper(user):
+    global current_scraper
+    global current_scraper_heavy
+
+    if user in heavy_users:
+        current_scraper_heavy = random.choice(list(set(SCRAPERS_HEAVY_VOLUME) - set([current_scraper_heavy])))
+    else:
+        current_scraper = random.choice(list(set(SCRAPERS) - set([current_scraper])))
+
+    return 0
+
+
 @xbot_webservice.route("/")
 def index():
     return 'xbot_proxy'
 
 
-def scrape(url):
-    global current_scraper
-    print(f'Using {current_scraper}')
+def scrape(url, user):
+    scraper = get_scraper(user)
+
+    print(f'Using {scraper}')
 
     if url == '':
         return {'Error': 'Parameter url not found'}, 400
     else:
-        r = requests.post(f'{current_scraper}{SCRAPER_ENDPOINT}', json={'url': url})
+        r = requests.post(f'{scraper}{SCRAPER_ENDPOINT}', json={'url': url})
         if r.json().get('short_description') is None:
-            current_scraper = random.choice(list(set(SCRAPERS) - set([current_scraper])))
-            r = requests.post(f'{current_scraper}{SCRAPER_ENDPOINT}', json={'url': url})
+            update_current_scraper(user)
+            r = requests.post(f'{scraper}{SCRAPER_ENDPOINT}', json={'url': url})
 
         return {'data': r.json(), 'status': 200}
 
@@ -44,7 +69,8 @@ def scrape(url):
 @xbot_webservice.route('/api/scrape', methods=['POST'])
 def redirect_scrape():
     url = request.json.get('url')
-    scraped = scrape(url)
+    user = request.json.get('user') or None
+    scraped = scrape(url, user)
     return Response(json.dumps(scraped['data']), status=scraped['status'], mimetype='application/json')
 
 
@@ -77,8 +103,6 @@ def new_offer():
             xbotdb.insert_product(product, telegram_name='XBOT_API')
 
     return Response(json.dumps(offers), status=200, mimetype='application/json')
-
-
 
 
 if __name__ == '__main__':
