@@ -1,6 +1,6 @@
 from flask import Flask, Response, request
 from flask_cors import CORS
-from webservice.config import SCRAPERS, SCRAPER_ENDPOINT, SCRAPERS_HEAVY_VOLUME
+from webservice.config import SCRAPERS, SCRAPER_ENDPOINT, SCRAPERS_HEAVY_VOLUME, SCRAPERS_XBOT
 import random
 import json
 import re
@@ -11,8 +11,10 @@ from xbot.product import loadProductfromJSON
 
 xbot_webservice = Flask(__name__)
 CORS(xbot_webservice)
+
 current_scraper = random.choice(SCRAPERS)
 current_scraper_heavy = random.choice(SCRAPERS_HEAVY_VOLUME)
+current_api_scraper = random.choice(SCRAPERS_XBOT)
 
 xbotdb = Xbotdb()
 heavy_users = ['gavaste']
@@ -26,9 +28,12 @@ def captureURLs(text):
 def get_scraper(user):
     global current_scraper
     global current_scraper_heavy
+    global current_api_scraper
 
     if user in heavy_users:
         return current_scraper_heavy
+    elif user == 'XBOT_API':
+        return current_api_scraper
     else:
         return current_scraper
 
@@ -39,6 +44,8 @@ def update_current_scraper(user):
 
     if user in heavy_users:
         current_scraper_heavy = random.choice(list(set(SCRAPERS_HEAVY_VOLUME) - set([current_scraper_heavy])))
+    elif user == 'XBOT_API':
+        current_scraper = random.choice(list(set(SCRAPERS_XBOT) - set([current_api_scraper])))
     else:
         current_scraper = random.choice(list(set(SCRAPERS) - set([current_scraper])))
 
