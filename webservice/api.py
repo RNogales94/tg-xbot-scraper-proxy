@@ -67,6 +67,7 @@ def scrape(url, user):
         return {'Error': 'Parameter url not found'}, 400
     else:
         r = requests.post(f'{scraper}{SCRAPER_ENDPOINT}', json={'url': url})
+        print(r.json())
         if r.json().get('short_description') is None:
             update_current_scraper(user)
             r = requests.post(f'{scraper}{SCRAPER_ENDPOINT}', json={'url': url})
