@@ -1,6 +1,6 @@
 from flask import Flask, Response, request
 from flask_cors import CORS
-from webservice.config import SCRAPERS, SCRAPER_ENDPOINT, SCRAPERS_HEAVY_VOLUME, SCRAPERS_XBOT
+from webservice.config import *
 import random
 import json
 import re
@@ -13,11 +13,11 @@ xbot_webservice = Flask(__name__)
 CORS(xbot_webservice)
 
 current_scraper = random.choice(SCRAPERS)
-current_scraper_heavy = random.choice(SCRAPERS_HEAVY_VOLUME)
+current_scraper_pro = random.choice(SCRAPERS_PRO)
 current_api_scraper = random.choice(SCRAPERS_XBOT)
 
 xbotdb = Xbotdb()
-heavy_users = ['gavaste']
+pro_users = ['gavaste', 'Vincent_Vegaa']
 
 
 def captureURLs(text):
@@ -27,11 +27,11 @@ def captureURLs(text):
 
 def get_scraper(user):
     global current_scraper
-    global current_scraper_heavy
+    global current_scraper_pro
     global current_api_scraper
 
-    if user in heavy_users:
-        return current_scraper_heavy
+    if user in pro_users:
+        return current_scraper_pro
     elif user == 'XBOT_API':
         return current_api_scraper
     else:
@@ -40,12 +40,17 @@ def get_scraper(user):
 
 def update_current_scraper(user):
     global current_scraper
-    global current_scraper_heavy
+    global current_scraper_pro
     global current_api_scraper
 
-    if user in heavy_users:
-        current_scraper_heavy = random.choice(list(set(SCRAPERS_HEAVY_VOLUME) - set([current_scraper_heavy])))
+    if user in pro_users:
+        current_scraper_pro = random.choice(list(set(SCRAPERS_PRO) - set([current_scraper_pro])))
+
+        # Avoid duplicated Dynos running
+        current_api_scraper = random.choice(list(set(SCRAPERS_XBOT) - set([current_api_scraper])))
+
     elif user == 'XBOT_API':
+        current_scraper_pro = random.choice(list(set(SCRAPERS_PRO) - set([current_scraper_pro])))
         current_api_scraper = random.choice(list(set(SCRAPERS_XBOT) - set([current_api_scraper])))
     else:
         current_scraper = random.choice(list(set(SCRAPERS) - set([current_scraper])))
