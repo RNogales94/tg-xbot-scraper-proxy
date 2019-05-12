@@ -17,7 +17,6 @@ current_scraper_pro = random.choice(SCRAPERS_PRO)
 current_api_scraper = random.choice(SCRAPERS_XBOT)
 
 xbotdb = Xbotdb()
-pro_users = ['gavaste', 'Vincent_Vegaa']
 
 
 def captureURLs(text):

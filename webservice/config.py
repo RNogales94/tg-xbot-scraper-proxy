@@ -2,6 +2,7 @@
 
 SCRAPER_ENDPOINT = '/api/scrape'
 
+pro_users = ['gavaste', 'Vincent_Vegaa', 'RNogales']
 
 
 SCRAPERS = [
