@@ -87,10 +87,8 @@ def new_offer():
         print(url)
         if is_amazon(url):
             scraped = scrape(url, 'XBOT_API')
-            response = json.dumps(scraped['data'])
             status = scraped['status']
         else:
-            response = {}
             status = 400
 
         if status == 200:
