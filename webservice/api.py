@@ -102,8 +102,8 @@ def new_offer():
         product = loadProductfromJSON(offer)
         if product.is_completed:
             xbotdb.insert_product(product, telegram_name='XBOT_API')
-
-    return Response(json.dumps({'Message': f'Document inserted in mongo ({len(offers)})'}), status=200, mimetype='application/json')
+    print({'Message': f'Document inserted in mongo ({len(offers)})'})
+    return Response(json.dumps(offers), status=200, mimetype='application/json')
 
 
 if __name__ == '__main__':
