@@ -85,8 +85,15 @@ def new_offer():
     offers = []
     for url in urls:
         print(url)
-        scraped = scrape(url, user='XBOT_API')
-        if scraped['status'] == 200:
+        if is_amazon(url):
+            scraped = scrape(url, 'XBOT_API')
+            response = json.dumps(scraped['data'])
+            status = scraped['status']
+        else:
+            response = {}
+            status = 400
+
+        if status == 200:
             offers.append(scraped['data'])
         print(origin)
 
@@ -96,7 +103,7 @@ def new_offer():
         if product.is_completed:
             xbotdb.insert_product(product, telegram_name='XBOT_API')
 
-    return Response(json.dumps(offers), status=200, mimetype='application/json')
+    return Response(json.dumps({'Message': f'Document inserted in mongo ({len(offers)})'}), status=200, mimetype='application/json')
 
 
 if __name__ == '__main__':
