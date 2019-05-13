@@ -1,92 +1,25 @@
 from flask import Flask, Response, request
 from flask_cors import CORS
-from webservice.config import *
-import random
 import json
-import re
 import requests
-import urllib
-import os
 
 from xbot.xbotdb import Xbotdb
 from xbot.product import loadProductfromJSON
 
+from webservice.scraper_broker import ScraperBroker
+from webservice.config import SCRAPER_ENDPOINT
+from webservice.url_utils import is_amazon, captureURLs
+
+
 xbot_webservice = Flask(__name__)
 CORS(xbot_webservice)
 
-current_scraper = random.choice(SCRAPERS)
-current_scraper_pro = random.choice(SCRAPERS_PRO)
-current_api_scraper = random.choice(SCRAPERS_XBOT)
-
+scrape_broker = ScraperBroker()
 xbotdb = Xbotdb()
 
 
-def captureURLs(text):
-    urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', text)
-    return urls
 
 
-def get_scraper(user):
-    global current_scraper
-    global current_scraper_pro
-    global current_api_scraper
-
-    if user in pro_users:
-        return current_scraper_pro
-    elif user == 'XBOT_API':
-        return current_api_scraper
-    else:
-        return current_scraper
-
-
-"""
-DELETE /apps/xbot-scraper01b/dynos/web.1 HTTP/1.1
-Host: api.heroku.com
-Content-Type: application/json
-Accept: application/vnd.heroku+json; version=3
-Authorization: Basic aW5mb0B4Ym90LmRldjowNjA4TmV5dW1hbnNhJA==
-cache-control: no-cache
-Postman-Token: 1b4c0af9-e7fd-4725-b14d-8af2112ae9a4
-"""
-
-
-def get_app_name(scraper_address):
-    return urllib.parse.urlparse(scraper_address).hostname.split('.')[0]
-
-
-def restart(scraper_address):
-    r = requests.delete(f'https://api.heroku.com/apps/{get_app_name(scraper_address)}/dynos/web.1', headers={
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.heroku+json; version=3',
-    }, auth=(os.environ['HEROKU_SCRAPERS_USER'], os.environ['HEROKU_SCRAPERS_PASS']))
-    print(f'Restarting {get_app_name(scraper_address)}')
-    print(f'{r.content}')
-    return r.status_code
-
-
-
-
-
-def update_current_scraper(user):
-    global current_scraper
-    global current_scraper_pro
-    global current_api_scraper
-
-    if user in pro_users:
-        restart(current_scraper_pro)
-
-        current_scraper_pro = random.choice(list(set(SCRAPERS_PRO) - set([current_scraper_pro])))
-        # Avoid duplicated Dynos running
-        current_api_scraper = current_scraper_pro
-
-    elif user == 'XBOT_API':
-        restart(current_api_scraper)
-        current_scraper_pro = random.choice(list(set(SCRAPERS_PRO) - set([current_scraper_pro])))
-        current_api_scraper = current_scraper_pro
-    else:
-        current_scraper = random.choice(list(set(SCRAPERS) - set([current_scraper])))
-
-    return 0
 
 
 @xbot_webservice.route("/")
@@ -95,7 +28,7 @@ def index():
 
 
 def scrape(url, user):
-    scraper = get_scraper(user)
+    scraper = scrape_broker.get_scraper(user)
 
     print(f'Using {scraper}')
 
@@ -111,7 +44,7 @@ def scrape(url, user):
             return {'data': {}, 'status': 501}
 
         if r.json().get('short_description') is None:
-            update_current_scraper(user)
+            scrape_broker.update_current_scraper(user)
             r = requests.post(f'{scraper}{SCRAPER_ENDPOINT}', json={'url': url})
 
         return {'data': r.json(), 'status': 200}
@@ -124,9 +57,15 @@ def redirect_scrape():
     user = request.json.get('user') or None
     print('URL='+url)
     print('user='+user)
-    scraped = scrape(url, user)
+    if is_amazon(url):
+        scraped = scrape(url, user)
+        response = json.dumps(scraped['data'])
+        status = scraped['status']
+    else:
+        response = {}
+        status = 400
     print('***********************************************')
-    return Response(json.dumps(scraped['data']), status=scraped['status'], mimetype='application/json')
+    return Response(response, status=status, mimetype='application/json')
 
 
 @xbot_webservice.route('/api/newoffer', methods=['POST'])
