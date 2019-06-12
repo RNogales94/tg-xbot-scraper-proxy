@@ -8,7 +8,7 @@ from xbot.product import loadProductfromJSON
 
 from webservice.scraper_broker import ScraperBroker
 from webservice.config import SCRAPER_ENDPOINT
-from webservice.url_utils import is_amazon, captureURLs
+from webservice.url_utils import is_amazon, captureURLs, is_aliexpress
 
 
 xbot_webservice = Flask(__name__)
@@ -57,7 +57,7 @@ def redirect_scrape():
     user = request.json.get('user') or None
     print('URL='+url)
     print('user='+user)
-    if is_amazon(url):
+    if is_amazon(url) or is_aliexpress(url):
         scraped = scrape(url, user)
         response = json.dumps(scraped['data'])
         status = scraped['status']
@@ -85,7 +85,7 @@ def new_offer():
     offers = []
     for url in urls:
         print(url)
-        if is_amazon(url):
+        if is_amazon(url) or is_aliexpress(url):
             scraped = scrape(url, 'XBOT_API')
             status = scraped['status']
         else:

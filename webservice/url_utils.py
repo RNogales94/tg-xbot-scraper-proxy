@@ -25,3 +25,12 @@ def is_amazon(url):
         print(f'Exception: Connection refused {url}')
         return False
     return 'amazon' in urllib.parse.urlparse(url).hostname
+
+
+def is_aliexpress(url):
+    try:
+        url = expand_url(url)
+    except requests.exceptions.ConnectionError:
+        print(f'Exception: Connection refused {url}')
+        return False
+    return 'aliexpress' in urllib.parse.urlparse(url).hostname
