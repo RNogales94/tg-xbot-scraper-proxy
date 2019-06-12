@@ -18,10 +18,6 @@ scrape_broker = ScraperBroker()
 xbotdb = Xbotdb()
 
 
-
-
-
-
 @xbot_webservice.route("/")
 def index():
     return 'xbot_proxy'
