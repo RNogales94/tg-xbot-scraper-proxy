@@ -35,6 +35,7 @@ def scrape(url, user):
         print(r.status_code)
         try:
             data = r.json()
+            print(data)
         except:
             print(f"Scraper {scraper} cannot scrape {url}")
             return {'data': {}, 'status': 501}
