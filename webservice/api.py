@@ -9,6 +9,7 @@ from xbot.product import loadProductfromJSON
 from webservice.scraper_broker import ScraperBroker
 from webservice.config import SCRAPER_ENDPOINT
 from webservice.url_utils import is_amazon, captureURLs, is_aliexpress
+from webservice.config import baned_users
 
 
 xbot_webservice = Flask(__name__)
@@ -27,6 +28,9 @@ def scrape(url, user):
     scraper = scrape_broker.get_scraper(user)
 
     print(f'Using {scraper}')
+
+    if user in baned_users:
+        return {'data': {'Error': 'Has agotado tu periodo de prueba, contacta con @RNogales para renovarlo'}, 'status': 200}
 
     if url == '':
         return {'data': {'Error': 'Parameter url not found'}, 'status': 400}

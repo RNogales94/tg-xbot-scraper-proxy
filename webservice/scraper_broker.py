@@ -4,7 +4,7 @@ import os
 
 from webservice.singleton import Singleton
 from webservice.url_utils import get_app_name
-from webservice.config import SCRAPERS, SCRAPERS_PRO, SCRAPERS_XBOT, pro_users
+from webservice.config import SCRAPERS, SCRAPERS_PRO, SCRAPERS_XBOT, pro_users, baned_users
 
 
 @Singleton
