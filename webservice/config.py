@@ -4,7 +4,7 @@ import os
 
 SCRAPER_ENDPOINT = '/api/scrape'
 
-pro_users = ['gavaste', 'Vincent_Vegaa', 'RNogales', 'Fkillo', 'DraCarYsssss']
+pro_users = ['Vincent_Vegaa', 'RNogales']
 
 
 SCRAPERS = [
