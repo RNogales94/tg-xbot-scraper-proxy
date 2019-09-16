@@ -5,8 +5,8 @@ import os
 SCRAPER_ENDPOINT = '/api/scrape'
 
 pro_users = ['Vincent_Vegaa']
-baned_users = ['gavaste']
-free_users = ['Fkillo', 'DraCarYsssss']
+baned_users = []
+free_users = ['Fkillo', 'gavaste', 'DraCarYsssss']
 
 
 SCRAPERS = [
