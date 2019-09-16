@@ -4,8 +4,10 @@ import os
 
 SCRAPER_ENDPOINT = '/api/scrape'
 
-pro_users = ['gavaste', 'Vincent_Vegaa']
-baned_users = ['RNogales', 'Fkillo', 'DraCarYsssss']
+pro_users = ['Vincent_Vegaa']
+baned_users = ['gavaste']
+free_users = ['Fkillo', 'DraCarYsssss']
+
 
 SCRAPERS = [
     'https://xbot-scraper01.herokuapp.com/',
