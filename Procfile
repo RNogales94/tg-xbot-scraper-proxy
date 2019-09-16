@@ -1,1 +1,1 @@
-gunicorn -b "0.0.0.0:$PORT" -w 1 wsgi:xbot_webservice
+web: newrelic-admin run-program gunicorn -b "0.0.0.0:$PORT" -w 3 wsgi:xbot_webservice
